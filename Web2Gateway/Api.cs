@@ -94,7 +94,6 @@ internal static class Api
 
                         return Results.NotFound();
                     }
-                    Console.WriteLine($"found: {key}");
                     var decodedValue = HexUtils.FromHex(rawValue);
                     var fileExtension = Path.GetExtension(key);
 
