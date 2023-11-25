@@ -1,9 +1,15 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Web2Gateway;
 
 internal static class Utils
 {
+    public static string SanitizeForLog(this string input)
+    {
+        return Regex.Replace(input, @"\W", "_");
+    }
+
     public static bool IsBase64Image(string data)
     {
         return data.StartsWith("data:image", StringComparison.OrdinalIgnoreCase);

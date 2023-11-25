@@ -37,7 +37,7 @@ public sealed class G2To3Service
             var keys = await _memoryCache.GetOrCreateAsync($"{storeId}", async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(15);
-                _logger.LogInformation("Getting keys for {StoreId}", storeId);
+                _logger.LogInformation("Getting keys for {StoreId}", storeId.SanitizeForLog());
                 return await _dataLayer.GetKeys(storeId, null, cancellationToken);
             });
 
@@ -56,7 +56,7 @@ public sealed class G2To3Service
             var value = await _memoryCache.GetOrCreateAsync($"{storeId}-{key}", async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(15);
-                _logger.LogInformation("Getting value for {StoreId} {Key}", storeId, key);
+                _logger.LogInformation("Getting value for {StoreId} {Key}", storeId.SanitizeForLog(), key.SanitizeForLog());
                 return await _dataLayer.GetValue(storeId, key, null, cancellationToken);
             });
 
