@@ -1,4 +1,8 @@
 using Web2Gateway;
+
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
+using Microsoft.Extensions.Hosting;
 using chia.dotnet;
 
 // doing all of this in the mini-api expressjs-like approach
@@ -11,10 +15,15 @@ if (builder.Environment.IsProduction())
     builder.Services.AddApplicationInsightsTelemetry();
 }
 
+if (OperatingSystem.IsWindows())
+{
+    LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(builder.Services);
+}
+
 // we can take the path to an appsettings.json file as an argument
 // if not provided, the default appsettings.json will be used and settings
 // will come from there or from environment variables
-if (args.Any())
+if (args.Length != 0)
 {
     var configurationBinder = new ConfigurationBuilder()
         .AddJsonFile(args.First());
@@ -24,9 +33,6 @@ if (args.Any())
 }
 
 // Add services to the container.
-builder.Logging.ClearProviders()
-    .AddConsole();
-
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<ChiaConfig>()
@@ -37,18 +43,13 @@ builder.Services.AddSingleton<ChiaConfig>()
     .AddSwaggerGen()
     .AddMemoryCache();
 
-var logger = LoggerFactory.Create(config =>
-{
-    config.AddConsole();
-}).CreateLogger("Program");
-var configuration = builder.Configuration;
-
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseSwagger()
-    .UseSwaggerUI();
-
+var configuration = app.Configuration;
+if (OperatingSystem.IsWindows() && configuration.GetValue("App:windows_service", false))
+{
+    builder.Host.UseWindowsService();
+}
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 // the service end points are defined in here
 app.ConfigureApi(logger)
     .UseCors();
