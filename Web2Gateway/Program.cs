@@ -2,7 +2,6 @@ using Web2Gateway;
 
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
-using Microsoft.Extensions.Hosting;
 using chia.dotnet;
 
 // doing all of this in the mini-api expressjs-like approach
@@ -49,10 +48,7 @@ if (OperatingSystem.IsWindows() && configuration.GetValue("App:windows_service",
 {
     builder.Host.UseWindowsService();
 }
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
-// the service end points are defined in here
-app.ConfigureApi(logger)
-    .UseCors();
 
+app.UseCors();
 app.MapControllers();
 app.Run();
